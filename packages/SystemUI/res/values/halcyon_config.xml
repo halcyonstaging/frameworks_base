@@ -53,4 +53,7 @@
     <!-- Interval between subsequent shifting of statusbar and navbar contents, in seconds -->
     <integer name="config_statusBarBurnInProtectionShiftInterval">60</integer>
 
+    <!-- Charging info current divider, if needed -->
+    <integer name="config_currentInfoDivider" translatable="false">1000</integer>
+
 </resources>
