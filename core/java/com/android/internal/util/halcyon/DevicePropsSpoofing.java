@@ -241,9 +241,10 @@ public class DevicePropsSpoofing {
                 } else {
                     propsToChange.putAll(propsToChangePixel5a);
                 }
-                if (packageName.equals("com.google.android.apps.photos")) {
-                    propsToChange.putAll(propsToChangePixelXL);
-                }
+            }
+
+	    if (packageName.equals("com.google.android.apps.photos")) {
+                propsToChange.putAll(propsToChangePixelXL);
             }
 
             if (DEBUG) Log.d(TAG, "Defining props for: " + packageName);
