@@ -41,9 +41,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.om.FabricatedOverlay;
-import android.content.om.IOverlayManager;
 import android.content.om.OverlayIdentifier;
-import android.content.om.OverlayInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -51,8 +49,6 @@ import android.database.ContentObserver;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -126,8 +122,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             "com.halcyon.overlay.customization.blacktheme";
     private static final boolean DEBUG = true;
 
-    private static final String DARK_OVERLAY_NAME = "com.android.pixys.dark_bg";
-
     private final ThemeOverlayApplier mThemeManager;
     private final UserManager mUserManager;
     private final BroadcastDispatcher mBroadcastDispatcher;
@@ -175,8 +169,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private final UiModeManager mUiModeManager;
     private ColorScheme mDarkColorScheme;
     private ColorScheme mLightColorScheme;
-
-    private IOverlayManager mOverlayManager;
 
     // Defers changing themes until Setup Wizard is done.
     private boolean mDeferredThemeEvaluation;
@@ -448,9 +440,6 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
         mUiModeManager = uiModeManager;
         mActivityManager = activityManager;
         dumpManager.registerDumpable(TAG, this);
-
-        mOverlayManager = IOverlayManager.Stub.asInterface(
-                ServiceManager.getService(Context.OVERLAY_SERVICE));
     }
 
     @Override
@@ -823,24 +812,10 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
             }
         }
 
-        boolean nightMode = (mResources.getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES;
-        boolean skipNeutral = false;
-        if (mOverlayManager != null && nightMode) {
-            OverlayInfo info = null;
-            try {
-                info = mOverlayManager.getOverlayInfo(DARK_OVERLAY_NAME, mUserTracker.getUserId());
-            } catch (RemoteException e) {
-                Log.e(TAG, "Failed getting overlay " + DARK_OVERLAY_NAME + " info");
-                e.printStackTrace();
-            }
-            skipNeutral = info != null && info.isEnabled();
-        }
-
         // Compatibility with legacy themes, where full packages were defined, instead of just
         // colors.
         if (!categoryToPackage.containsKey(OVERLAY_CATEGORY_SYSTEM_PALETTE)
-                && mNeutralOverlay != null && !skipNeutral) {
+                && mNeutralOverlay != null) {
             categoryToPackage.put(OVERLAY_CATEGORY_SYSTEM_PALETTE,
                     mNeutralOverlay.getIdentifier());
         }
